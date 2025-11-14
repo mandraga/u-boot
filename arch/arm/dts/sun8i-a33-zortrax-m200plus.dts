@@ -49,8 +49,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	model = "Zortrax A33-M200";
-	compatible = "zortrax,a33-m200","allwinner,sun8i-a33";
+	model = "Zortrax A33-M200Plus";
+	compatible = "zortrax,a33-m200plus","allwinner,sun8i-a33";
 
 	aliases {
 		serial0 = &uart0;   // Console on PF2 and PF4
@@ -442,6 +442,12 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
         compatible = "mmc-pwrseq-simple";
         reset-gpios = <&pio 11 6 GPIO_ACTIVE_HIGH>; // PL6
     };
+/*
+	mmc_pwrseq: mmc-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		reset-gpios = <&pio 2 16 GPIO_ACTIVE_HIGH>; // PC16
+	};
+*/
     /*
 	wireless-bluetooth {
 		bt_wake_pin: bt-wake-pin {

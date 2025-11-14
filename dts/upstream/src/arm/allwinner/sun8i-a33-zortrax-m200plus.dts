@@ -49,8 +49,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	model = "Zortrax A33-M200";
-	compatible = "zortrax,a33-m200","allwinner,sun8i-a33";
+	model = "Zortrax A33-M200Plus";
+	compatible = "zortrax,a33-m200plus","allwinner,sun8i-a33";
 
 	aliases {
 		serial0 = &uart0;   // Console on PF2 and PF4
