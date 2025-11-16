@@ -118,18 +118,9 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc1_pg_pins>;
 	vmmc-supply = <&reg_dldo1>;
-	mmc-pwrseq = <&wifi_pwrseq>;
 	bus-width = <4>;
 	non-removable;
 	status = "okay";
-
-	brcmf: wifi@1 {
-		reg = <1>;
-		compatible = "brcm,bcm4329-fmac";
-		interrupt-parent = <&r_pio>;
-		interrupts = <0 7 IRQ_TYPE_LEVEL_LOW>; /* PL7 */
-		interrupt-names = "host-wake";
-	};
 };
 
 &mmc2 {
@@ -437,17 +428,17 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
         function = "uart2";
     };
     */
-
+	/*
     wifi_pwrseq: wifi-pwrseq {
         compatible = "mmc-pwrseq-simple";
         reset-gpios = <&pio 11 6 GPIO_ACTIVE_HIGH>; // PL6
     };
-/*
+
 	mmc_pwrseq: mmc-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <&pio 2 16 GPIO_ACTIVE_HIGH>; // PC16
 	};
-*/
+	*/
     /*
 	wireless-bluetooth {
 		bt_wake_pin: bt-wake-pin {
