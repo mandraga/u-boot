@@ -47,6 +47,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/pwm/pwm.h>
 
 / {
 	model = "Zortrax A33-M200Plus";
@@ -84,12 +85,224 @@
 			gpios = <&pio 2 2 GPIO_ACTIVE_HIGH>;  // PC02: port C (2), pin 2
 		};
 	};
+
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm 0 50000 PWM_POLARITY_INVERTED>;
+		brightness-levels = <0 10 20 30 40 50 60 70 80 90 100 197>;
+		default-brightness-level = <197>;
+		power-supply = <&reg_dc1sw>;
+	};
+
+	//compatible = "sl698ph,720p";
+	panel: panel {
+		compatible = "panel-simple";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		backlight = <&backlight>;		
+		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
+		reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>;  // PH09
+		power-supply = <&reg_dc1sw>;
+		power-supply1 = <&reg_eldo2>;
+		status = "enabled";
+
+		panel-timing  {
+			clock-frequency = <31000000>;
+			hactive = <480>;
+			vactive = <800>;
+			hback-porch = <44>;
+			hfront-porch = <(575 - 480 - 44 - 6)>; // calculate as needed
+			hsync-len = <6>;
+			vback-porch = <16>;
+			vfront-porch = <(896 - 800 - 16 - 1)>; // calculate as needed
+			vsync-len = <1>;
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <1>;
+		};
+
+		port {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			panel_input: endpoint {
+				remote-endpoint = <&tcon0_out_lcd>;
+			};
+		};
+	};
+
+/*
+	lcd0 {
+		status = "okay";
+		compatible = "sl698ph,720p";
+		interface-type = "dsi";
+		dsi-lanes = <2>;
+		dsi-format = <0>; // usually RGB888
+		dsi-eotp = <0>;
+		dsi-vc = <0>;
+		dsi-te = <0>;
+
+		backlight = <&backlight>;
+		brightness-levels = <197>;
+		default-brightness-level = <197>;
+		contrast = <50>;
+		saturation = <57>;
+		hue = <50>;
+		gamma-enable = <0>;
+		bright-curve-enable = <0>;
+		cmap-enable = <0>;
+		deu-mode = <0>;
+		lcdgamma4iep = <22>;
+		smart-color = <90>;
+
+		width-mm = <51>;
+		height-mm = <86>;
+
+		port {
+			panel_input: endpoint {
+				remote-endpoint = <&tcon0_out_panel>;
+			};
+		};
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+				clock-frequency = <31000000>;
+				hactive = <480>;
+				vactive = <800>;
+				hback-porch = <44>;
+				hfront-porch = <(575 - 480 - 44 - 6)>; // calculate as needed
+				hsync-len = <6>;
+				vback-porch = <16>;
+				vfront-porch = <(896 - 800 - 16 - 1)>; // calculate as needed
+				vsync-len = <1>;
+				de-active = <1>;
+				pixelclk-active = <1>;
+			};
+		};
+	};
+ */
 };
 
 // No audio
 &codec {
 	status = "disabled";
 };
+
+&simplefb_lcd {
+	vcc-lcd-supply = <&reg_dc1sw>;
+};
+
+&de {
+    status = "okay";
+};
+
+&tcon0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_rgb666_pins>;
+	status = "okay";
+};
+
+&tcon0_out {
+	tcon0_out_lcd: endpoint@0 {
+		reg = <0>;
+		remote-endpoint = <&panel_input>;
+	};
+};
+
+/*
+&tcon0 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&lcd_lvds_pins>; // or your DSI pinmux if needed
+    ports {
+        port@0 {
+            reg = <0>;
+            tcon0_in_de: endpoint {
+                remote-endpoint = <&de_out_tcon0>;
+            };
+        };
+        port@1 {
+            reg = <1>;
+            tcon0_out_dsi: endpoint {
+                remote-endpoint = <&dsi_in_tcon0>;
+            };
+        };
+    };
+};
+
+&dsi {
+    status = "okay";
+    ports {
+        port@0 {
+            reg = <0>;
+            dsi_in_tcon0: endpoint {
+                remote-endpoint = <&tcon0_out_dsi>;
+            };
+        };
+        port@1 {
+            reg = <1>;
+            dsi_out_panel: endpoint {
+                remote-endpoint = <&panel_in_dsi>;
+            };
+        };
+    };
+    panel@0 {
+        compatible = "your,panel-compatible"; // e.g. "panel-simple"
+        reg = <0>;
+        dsi-lanes = <2>;
+        // ... other panel properties ...
+        port {
+            panel_in_dsi: endpoint {
+                remote-endpoint = <&dsi_out_panel>;
+            };
+        };
+    };
+};
+*/
+/*
+&de {
+    status = "okay";
+    ports {
+        port@1 {
+            reg = <1>;
+            de_out_dsi: endpoint {
+                remote-endpoint = <&dsi_in_panel>;
+            };
+        };
+    };
+};
+
+&dsi {
+    status = "okay";
+    panel@0 {
+        compatible = "your,panel";
+        reg = <0>;
+        ...
+        ports {
+            port {
+                dsi_in_panel: endpoint {
+                    remote-endpoint = <&de_out_dsi>;
+                };
+            };
+        };
+    };
+}
+*/
+/*
+&tcon0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_rgb666_pins>;
+	status = "okay";
+};
+
+&tcon0_out {
+	tcon0_out_panel: endpoint@0 {
+		reg = <0>;
+		remote-endpoint = <&panel_input>;
+	};
+};*/
 
 &dai {
 	status = "disabled";
@@ -216,12 +429,14 @@
 	regulator-name = "vcc-dram";
 };
 
-
+// rf section in the fex file
+/*
 &reg_eldo1 {
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
-	regulator-name = "vcc-1v8-unknownusage";
+	regulator-name = "vcc-1v8-unknownusage_1";
 };
+*/
 
 &reg_eldo2 {
 	regulator-min-microvolt = <1800000>;
@@ -241,12 +456,13 @@
 	regulator-name = "vcc-3V3-Wifi_unused";
 };
 
-
+/*
 &reg_dldo2 {
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
-	regulator-name = "vcc-1v8-unknownusage";
+	regulator-name = "vcc-1v8-unknownusage_2";
 };
+*/
 
 &reg_dldo3 {
 	regulator-min-microvolt = <2800000>;
@@ -340,7 +556,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     status = "okay";
 
     touchscreen@38 {
-        compatible = "focaltech,ft5x06";
+        compatible = "edt,edt-ft5x06", "edt,edt-ft5206";
         reg = <0x38>;
         interrupt-parent = <&pio>;
 		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5
@@ -385,6 +601,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 };
 */
 
+/* For u-boot
 &usb_otg {
 	dr_mode = "otg";
 	status = "disabled";
@@ -397,7 +614,35 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 &usbphy {
 	status = "okay";
 };
+*/
+// For linux
+&usb_otg {
+	dr_mode = "otg";
+	status = "okay";
+};
 
+&usb_power_supply {
+	status = "okay";
+};
+
+&usbphy {
+	compatible = "allwinner,sun8i-a23-usb-phy";
+    usb0_id_det-gpios = <&pio 7 8 GPIO_ACTIVE_HIGH>; // PH08: port H (7), pin 8
+	// VBUS detection from AXP221 internally, no AXP223 GPIO is connected to VBUS
+	// does not work usb0_vbus_det-gpio = <&axp_gpio 1 GPIO_ACTIVE_HIGH>; // AXP221 GPIO1 has also the POWER label and toggles at the same time as VBUS on kernel start
+	//usb0_vbus_det-gpio = <&axp_gpio 0 GPIO_ACTIVE_HIGH>;
+	// Non sense pin
+	//usb0_vbus_det-gpio = <&pio 1 3 GPIO_ACTIVE_HIGH>; // PB3 does not work neither
+    usb0_vbus-supply = <&reg_dcdc1>;
+	//usb1_vbus-supply = <&usb_power_supply>; // USB1 VBUS is always on
+    status = "okay";
+};
+
+&pwm {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pwm0_pin>;
+	status = "okay";
+};
 
 &pio {
     vcc-pa-supply = <&reg_dcdc1>;
@@ -457,71 +702,6 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 };
 
 
-// LCD generated by copilot
-// Should be cross compiled aside: sl698ph_720p.c
-/*
-&de {
-    status = "okay";
-    assigned-clocks = <&ccu CLK_DE>;
-    assigned-clock-rates = <297000000>;
-};
-
-&lcd0 {
-    status = "okay";
-    compatible = "sl698ph,720p";
-    interface-type = "dsi";
-    dsi-lanes = <2>;
-    dsi-format = <0>; // usually RGB888
-    dsi-eotp = <0>;
-    dsi-vc = <0>;
-    dsi-te = <0>;
-
-    width-mm = <51>;
-    height-mm = <86>;
-    display-timings {
-        native-mode = <&timing0>;
-        timing0: timing0 {
-            clock-frequency = <31000000>;
-            hactive = <480>;
-            vactive = <800>;
-            hback-porch = <44>;
-            hfront-porch = <(575 - 480 - 44 - 6)>; // calculate as needed
-            hsync-len = <6>;
-            vback-porch = <16>;
-            vfront-porch = <(896 - 800 - 16 - 1)>; // calculate as needed
-            vsync-len = <1>;
-            de-active = <1>;
-            pixelclk-active = <1>;
-        };
-    };
-
-    backlight = <&backlight>;
-    brightness-levels = <197>;
-    default-brightness-level = <197>;
-    contrast = <50>;
-    saturation = <57>;
-    hue = <50>;
-    gamma-enable = <0>;
-    bright-curve-enable = <0>;
-    cmap-enable = <0>;
-    deu-mode = <0>;
-    lcdgamma4iep = <22>;
-    smart-color = <90>;
-
-    enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
-    reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>;  // PH09
-    power-supply = <&reg_dc1sw>;
-    power-supply1 = <&reg_eldo2>;
-};
-
-&backlight {
-    status = "okay";
-    pwms = <&pwm 0 50000 1>; // channel 0, freq 50kHz, polarity 1
-    brightness-levels = <197>;
-    default-brightness-level = <197>;
-};
-*/
-
 /* 
 &csi {
     status = "okay";
@@ -571,3 +751,4 @@ gc2145: camera@3c {
     };
 };
  */
+ 
