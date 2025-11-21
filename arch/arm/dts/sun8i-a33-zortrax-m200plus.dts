@@ -94,77 +94,20 @@
 		power-supply = <&reg_dc1sw>;
 	};
 
-	//compatible = "sl698ph,720p";
 	panel: panel {
-		compatible = "panel-simple";
-		#address-cells = <1>;
-		#size-cells = <0>;
-		backlight = <&backlight>;		
+		compatible = "bananapi,s070wv20-ct16";
+		backlight = <&backlight>;
+		vcc-supply = <&reg_dc1sw>;
+		iovcc-supply = <&reg_eldo2>;
 		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
-		reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>;  // PH09
-		power-supply = <&reg_dc1sw>;
-		power-supply1 = <&reg_eldo2>;
-		status = "enabled";
-
-		panel-timing  {
-			clock-frequency = <31000000>;
-			hactive = <480>;
-			vactive = <800>;
-			hback-porch = <44>;
-			hfront-porch = <(575 - 480 - 44 - 6)>; // calculate as needed
-			hsync-len = <6>;
-			vback-porch = <16>;
-			vfront-porch = <(896 - 800 - 16 - 1)>; // calculate as needed
-			vsync-len = <1>;
-			hsync-active = <0>;
-			vsync-active = <0>;
-			de-active = <1>;
-			pixelclk-active = <1>;
-		};
+		reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; // PH09
 
 		port {
-			#address-cells = <1>;
-			#size-cells = <0>;
-
 			panel_input: endpoint {
 				remote-endpoint = <&tcon0_out_lcd>;
 			};
 		};
-	};
-
 /*
-	lcd0 {
-		status = "okay";
-		compatible = "sl698ph,720p";
-		interface-type = "dsi";
-		dsi-lanes = <2>;
-		dsi-format = <0>; // usually RGB888
-		dsi-eotp = <0>;
-		dsi-vc = <0>;
-		dsi-te = <0>;
-
-		backlight = <&backlight>;
-		brightness-levels = <197>;
-		default-brightness-level = <197>;
-		contrast = <50>;
-		saturation = <57>;
-		hue = <50>;
-		gamma-enable = <0>;
-		bright-curve-enable = <0>;
-		cmap-enable = <0>;
-		deu-mode = <0>;
-		lcdgamma4iep = <22>;
-		smart-color = <90>;
-
-		width-mm = <51>;
-		height-mm = <86>;
-
-		port {
-			panel_input: endpoint {
-				remote-endpoint = <&tcon0_out_panel>;
-			};
-		};
-
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: timing0 {
@@ -177,12 +120,36 @@
 				vback-porch = <16>;
 				vfront-porch = <(896 - 800 - 16 - 1)>; // calculate as needed
 				vsync-len = <1>;
+				hsync-active = <0>;
+				vsync-active = <0>;
 				de-active = <1>;
 				pixelclk-active = <1>;
 			};
 		};
+	*/
 	};
- */
+/*
+	panel: panel {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        panel@0 {
+            compatible = "panel-simple";
+			backlight = <&backlight>;
+            vcc-supply = <&reg_dc1sw>;
+            iovcc-supply = <&reg_eldo2>;
+			enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
+            reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; // PH09
+
+			port {
+				panel_input: endpoint {
+					remote-endpoint = <&dsi_out_panel>;
+				};
+			};
+
+
+        };
+    };
+	*/
 };
 
 // No audio
@@ -195,7 +162,7 @@
 };
 
 &de {
-    status = "okay";
+	status = "okay";
 };
 
 &tcon0 {
@@ -214,15 +181,10 @@
 /*
 &tcon0 {
     status = "okay";
-    pinctrl-names = "default";
-    pinctrl-0 = <&lcd_lvds_pins>; // or your DSI pinmux if needed
     ports {
-        port@0 {
-            reg = <0>;
-            tcon0_in_de: endpoint {
-                remote-endpoint = <&de_out_tcon0>;
-            };
-        };
+        #address-cells = <1>;
+        #size-cells = <0>;
+
         port@1 {
             reg = <1>;
             tcon0_out_dsi: endpoint {
@@ -231,79 +193,78 @@
         };
     };
 };
-
-&dsi {
-    status = "okay";
-    ports {
-        port@0 {
-            reg = <0>;
-            dsi_in_tcon0: endpoint {
-                remote-endpoint = <&tcon0_out_dsi>;
-            };
-        };
-        port@1 {
-            reg = <1>;
-            dsi_out_panel: endpoint {
-                remote-endpoint = <&panel_in_dsi>;
-            };
-        };
-    };
-    panel@0 {
-        compatible = "your,panel-compatible"; // e.g. "panel-simple"
-        reg = <0>;
-        dsi-lanes = <2>;
-        // ... other panel properties ...
-        port {
-            panel_in_dsi: endpoint {
-                remote-endpoint = <&dsi_out_panel>;
-            };
-        };
-    };
-};
 */
+
+// Display engine
 /*
 &de {
     status = "okay";
-    ports {
-        port@1 {
-            reg = <1>;
-            de_out_dsi: endpoint {
-                remote-endpoint = <&dsi_in_panel>;
-            };
-        };
-    };
 };
-
-&dsi {
-    status = "okay";
-    panel@0 {
-        compatible = "your,panel";
-        reg = <0>;
-        ...
-        ports {
-            port {
-                dsi_in_panel: endpoint {
-                    remote-endpoint = <&de_out_dsi>;
-                };
-            };
-        };
-    };
-}
 */
 /*
-&tcon0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&lcd_rgb666_pins>;
+&dsi {
+    ports {
+	    #address-cells = <1>;
+        #size-cells = <0>;
+        port@1 {
+            reg = <1>;
+            dsi_out_panel: endpoint {
+                remote-endpoint = <&panel_input>;
+            };
+        };
+    };
+};*/
+/*
+&dsi {
 	status = "okay";
+	mipi_panel: mipi-panel {
+		compatible = "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight>;
+		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
+		reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; // PH09
+		vcc-dsi-supply = <&reg_dc1sw>;
+		iovcc-supply = <&reg_eldo2>;
+		bpc = <8>;
+		bus-format = <0x100a>;
+		width-mm = <154>;
+		height-mm = <85>;
+		prepare-delay-ms = <10>;
+		reset-delay-ms = <20>;
+		init-delay-ms = <120>;
+		//dsi,flags = <MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST | MIPI_DSI_MODE_LPM>;
+		//dsi,format = ;
+		dsi,lanes = <2>;
+
+		display-timings {
+			native-mode = <&timing2>;
+				timing2: timing2 {
+					clock-frequency = <31000000>;
+					hactive = <480>;
+					vactive = <800>;
+					hfront-porch = <(575 - 480 - 44 - 6)>;
+					hback-porch = <44>; //hbp
+					hsync-len = <6>; //hsa
+					vfront-porch = <(896 - 800 - 16 - 1)>;
+					vsync-len = <1>; //vsa
+					vback-porch = <16>; //vbp
+					hsync-active = <0>; //hync active control
+					vsync-active = <0>; //vsync active control
+					de-active = <1>; //den active control
+					pixelclk-active = <1>; //dclk active control
+				};
+		};
+	};
 };
 
-&tcon0_out {
-	tcon0_out_panel: endpoint@0 {
-		reg = <0>;
-		remote-endpoint = <&panel_input>;
-	};
-};*/
 
+&dphy {
+    status = "okay";
+};
+
+*/
+
+// Digital Audio Interface
 &dai {
 	status = "disabled";
 };
@@ -430,13 +391,12 @@
 };
 
 // rf section in the fex file
-/*
 &reg_eldo1 {
+	status = "disabled";
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-unknownusage_1";
 };
-*/
 
 &reg_eldo2 {
 	regulator-min-microvolt = <1800000>;
@@ -456,13 +416,12 @@
 	regulator-name = "vcc-3V3-Wifi_unused";
 };
 
-/*
 &reg_dldo2 {
+	status = "disabled";
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-unknownusage_2";
 };
-*/
 
 &reg_dldo3 {
 	regulator-min-microvolt = <2800000>;
@@ -648,7 +607,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     vcc-pa-supply = <&reg_dcdc1>;
     vcc-pb-supply = <&reg_dcdc1>;
     vcc-pc-supply = <&reg_dcdc1>;
-    //vcc-pe-supply = <&reg_eldo2>;
+    vcc-pe-supply = <&reg_eldo2>;
     vcc-pe-supply = <&reg_dcdc1>;
     vcc-pf-supply = <&reg_dcdc1>;
     vcc-pg-supply = <&reg_dcdc1>;
