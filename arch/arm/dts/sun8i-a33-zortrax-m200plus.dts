@@ -89,17 +89,17 @@
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm 0 50000 PWM_POLARITY_INVERTED>;
-		brightness-levels = <0 10 20 30 40 50 60 70 80 90 100 197>;
-		default-brightness-level = <197>;
+		brightness-levels = <0 10 20 30 40 50 60 70 80 90 100 >;
+		default-brightness-level = <100>;
+		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
 		power-supply = <&reg_dc1sw>;
 	};
 
 	panel: panel {
-		compatible = "bananapi,s070wv20-ct16";
+		compatible = "microtech,mtf0397swi-06";
 		backlight = <&backlight>;
 		vcc-supply = <&reg_dc1sw>;
 		iovcc-supply = <&reg_eldo2>;
-		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
 		reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; // PH09
 
 		port {
@@ -214,55 +214,12 @@
         };
     };
 };*/
+
+// Mipi dphy
 /*
-&dsi {
-	status = "okay";
-	mipi_panel: mipi-panel {
-		compatible = "simple-panel-dsi";
-		reg = <0>;
-		backlight = <&backlight>;
-		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
-		reset-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; // PH09
-		vcc-dsi-supply = <&reg_dc1sw>;
-		iovcc-supply = <&reg_eldo2>;
-		bpc = <8>;
-		bus-format = <0x100a>;
-		width-mm = <154>;
-		height-mm = <85>;
-		prepare-delay-ms = <10>;
-		reset-delay-ms = <20>;
-		init-delay-ms = <120>;
-		//dsi,flags = <MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST | MIPI_DSI_MODE_LPM>;
-		//dsi,format = ;
-		dsi,lanes = <2>;
-
-		display-timings {
-			native-mode = <&timing2>;
-				timing2: timing2 {
-					clock-frequency = <31000000>;
-					hactive = <480>;
-					vactive = <800>;
-					hfront-porch = <(575 - 480 - 44 - 6)>;
-					hback-porch = <44>; //hbp
-					hsync-len = <6>; //hsa
-					vfront-porch = <(896 - 800 - 16 - 1)>;
-					vsync-len = <1>; //vsa
-					vback-porch = <16>; //vbp
-					hsync-active = <0>; //hync active control
-					vsync-active = <0>; //vsync active control
-					de-active = <1>; //den active control
-					pixelclk-active = <1>; //dclk active control
-				};
-		};
-	};
-};
-
-
 &dphy {
     status = "okay";
-};
-
-*/
+};*/
 
 // Digital Audio Interface
 &dai {
@@ -607,13 +564,13 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     vcc-pa-supply = <&reg_dcdc1>;
     vcc-pb-supply = <&reg_dcdc1>;
     vcc-pc-supply = <&reg_dcdc1>;
-    vcc-pe-supply = <&reg_eldo2>;
+    vcc-pd-supply = <&reg_eldo2>;
     vcc-pe-supply = <&reg_dcdc1>;
     vcc-pf-supply = <&reg_dcdc1>;
     vcc-pg-supply = <&reg_dcdc1>;
 	vcc-ph-supply = <&reg_dcdc1>;
-    //vcc-pl-supply = <&reg_dldo1>; // Not clear, but reg not found in the kernel start
 	vcc-pl-supply = <&reg_dcdc1>;
+    //vcc-pl-supply = <&reg_dldo1>; // Not clear, but reg not found in the kernel start
 
 	uart0_pf_pins: uart0-pf-pins {
 		allwinner,pins = "PF2", "PF4";
