@@ -24,10 +24,10 @@ CONFIG_UART0_PORT_F=y
 #CONFIG_ENV_IS_IN_FAT=y
 #CONFIG_ENV_FAT_DEVICE_AND_PART="2:2"
 #CONFIG_ENV_FAT_FILE="uboot.env"
-CONFIG_BOOTCOMMAND="setenv bootargs root=/dev/sda1 rootwait console=ttyS0,115200; \
+CONFIG_BOOTCOMMAND="setenv bootargs root=/dev/sda1 rootwait console=ttyS0,115200 rw; \
 usb start; \
-ext4load usb 0:1 0x42000000 boot/zImage; \
-ext4load usb 0:3 0x43000000 sun8i-a33-zortrax-m200plus.dtb; \
+ext4load usb 0:2 0x42000000 boot/zImage; \
+ext4load usb 0:1 0x43000000 sun8i-a33-zortrax-m200plus.dtb; \
 bootz 0x42000000 - 0x43000000"
 ## LCD
 #CONFIG_VIDEO_LCD_HIMAX_HX8394=y

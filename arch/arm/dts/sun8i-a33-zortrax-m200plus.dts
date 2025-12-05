@@ -84,6 +84,11 @@
 			label = "mcuboot:led1:usr";
 			gpios = <&pio 2 2 GPIO_ACTIVE_HIGH>;  // PC02: port C (2), pin 2
 		};
+		axp-gpio1-led {
+			label = "axp-gpio1";
+			gpios = <&axp_gpio 1 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
 	};
 
 	backlight: backlight {
@@ -96,6 +101,7 @@
 	};
 
 	panel: panel {
+		status = "okay";
 		compatible = "microtech,mtf0397swi-06";
 		backlight = <&backlight>;
 		vcc-supply = <&reg_dc1sw>;
@@ -278,6 +284,12 @@
 		interrupt-parent = <&r_intc>;
 		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_LOW>;
 		eldoin-supply = <&reg_dcdc1>;
+
+		axp_gpio: gpio {
+			compatible = "x-powers,axp221-gpio";
+			gpio-controller;
+			#gpio-cells = <2>;
+		};
 	};
 };
 
@@ -300,15 +312,15 @@
 
 &reg_aldo2 {
 	regulator-always-on;
-	regulator-min-microvolt = <2350000>;
-	regulator-max-microvolt = <2650000>;
+	regulator-min-microvolt = <2500000>;
+	regulator-max-microvolt = <2500000>;
 	regulator-name = "vdd-dll";
 };
 
 &reg_aldo3 {
 	regulator-always-on;
-	regulator-min-microvolt = <2700000>;
-	regulator-max-microvolt = <3300000>;
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
 	regulator-name = "vcc-pll-avcc";
 };
 
@@ -328,18 +340,25 @@
 
 &reg_dcdc2 {
 	regulator-always-on;
-	regulator-min-microvolt = <900000>;
-	regulator-max-microvolt = <1400000>;
+	regulator-min-microvolt = <1100000>;
+	regulator-max-microvolt = <1100000>;
 	regulator-name = "vdd-sys";
 };
 
 &reg_dcdc3 {
 	regulator-always-on;
-	regulator-min-microvolt = <900000>;
-	regulator-max-microvolt = <1400000>;
+	regulator-min-microvolt = <1200000>;
+	regulator-max-microvolt = <1200000>;
 	regulator-name = "vdd-cpu";
 };
-
+/*
+&reg_dcdc4 {
+	regulator-always-on;
+	regulator-min-microvolt = <1100000>;
+	regulator-max-microvolt = <1100000>;
+	regulator-name = "vdd-sys";
+};
+*/
 &reg_dcdc5 {
 	regulator-always-on;
 	regulator-min-microvolt = <1500000>;
@@ -353,26 +372,44 @@
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-unknownusage_1";
+	vin-supply = <&reg_dcdc1>;
 };
 
+/*vip_dev1_iovdd = "axp22_dldo3"
+vip_dev1_iovdd_vol = 2800000
+vip_dev1_avdd = "axp22_ldoio0"
+vip_dev1_avdd_vol = 2800000
+vip_dev1_dvdd = "axp22_eldo2"
+vip_dev1_dvdd_vol = 1800000
+vip_dev1_afvdd = "axp22_eldo3"
+vip_dev1_afvdd_vol = 2800000 */
+
+// It does not start
 &reg_eldo2 {
+	status = "okay";
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-csi";
+	vin-supply = <&reg_dcdc1>;
 };
 
+// 
 &reg_eldo3 {
+	status = "okay";
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "vcc-2v8-csi";
+	vin-supply = <&reg_dcdc1>;
 };
 
 &reg_dldo1 {
+	status = "okay";
 	regulator-min-microvolt = <3300000>;
 	regulator-max-microvolt = <3300000>;
 	regulator-name = "vcc-3V3-Wifi_unused";
 };
 
+// Wifi chip (not on rev2.&, and you will use a usb wifi dongle instead on rev 1.1)
 &reg_dldo2 {
 	status = "disabled";
 	regulator-min-microvolt = <1800000>;
@@ -380,11 +417,29 @@
 	regulator-name = "vcc-1v8-unknownusage_2";
 };
 
+// Disabled if no camera connected
 &reg_dldo3 {
+	status = "disabled";
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "iovdd-2v8-csi";
 };
+
+/*
+&reg_ldo_io0 {
+	regulator-name = "ldo_io0";
+	status = "okay";
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+};
+*/
+
+&reg_ldo_io1 {
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
+ 	regulator-name = "ldo_io1";
+ 	status = "okay";
+ };
 
 &reg_dc1sw {
 	regulator-name = "vcc-lcd";
@@ -466,17 +521,22 @@ p3 = +3V SW LED GND GND GND DP DN VBUS VBUS
 SW seems unconnected to the SOM, hence the useless switch on the printer, probably that they did not latch the power off state.
 
 SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
+
+        interrupt-parent = <&pio>;
+		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5
+
 */
 
 &i2c0 {
+	clock-frequency = <100000>;
     status = "okay";
 
     touchscreen@38 {
-        compatible = "edt,edt-ft5x06", "edt,edt-ft5206";
+        compatible = "edt,edt-ft5x06";
         reg = <0x38>;
-        interrupt-parent = <&pio>;
-		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5
-        reset-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>; // PG10: port G (6), pin 10
+        reset-gpios = <&pio 6 10 GPIO_ACTIVE_LOW>; // PG10: port G (6), pin 10
+		vcc-supply = <&reg_dcdc1>;
+		iovcc-supply = <&reg_dcdc1>;
         touchscreen-size-x = <480>;
         touchscreen-size-y = <800>;
         touchscreen-inverted-x = <0>;
@@ -486,7 +546,15 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
         status = "okay";
     };
 };
+/*
+&i2c1 {
+	status = "okay";
+};
 
+&i2c2 {
+	status = "okay";
+};
+*/
 /*
 &usb_otg {
 	//dr_mode = "host";
@@ -564,7 +632,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     vcc-pa-supply = <&reg_dcdc1>;
     vcc-pb-supply = <&reg_dcdc1>;
     vcc-pc-supply = <&reg_dcdc1>;
-    vcc-pd-supply = <&reg_eldo2>;
+    vcc-pd-supply = <&reg_dcdc1>;
     vcc-pe-supply = <&reg_dcdc1>;
     vcc-pf-supply = <&reg_dcdc1>;
     vcc-pg-supply = <&reg_dcdc1>;
