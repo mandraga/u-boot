@@ -43,7 +43,7 @@
 
 /dts-v1/;
 #include "sun8i-a33.dtsi"
-//#include "sunxi-common-regulators.dtsi"
+#include "sunxi-common-regulators.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
@@ -281,21 +281,6 @@
 		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
 		eldoin-supply = <&reg_dcdc1>;
 		x-powers,drive-vbus-en;
-
-		axp_gpio: gpio {
-			compatible = "x-powers,axp223-gpio";
-			status = "okay";
-
-			gpio0_ldo_pin: gpio0-ldo-pin {
-				axp_gpio,pins = "GPIO0";
-				axp_gpio,function = "ldo";
-			};
-
-			gpio1_ldo_pin: gpio1-ldo-pin {
-				axp_gpio,pins = "GPIO1";
-				axp_gpio,function = "ldo";
-			};
-		};
 	};
 };
 
@@ -392,7 +377,7 @@ vip_dev1_afvdd_vol = 2800000 */
 
 // It does not start
 &reg_eldo2 {
-	status = "okay";
+	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-csi";
@@ -401,7 +386,6 @@ vip_dev1_afvdd_vol = 2800000 */
 
 // 
 &reg_eldo3 {
-	status = "okay";
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "vcc-2v8-csi";
@@ -409,7 +393,6 @@ vip_dev1_afvdd_vol = 2800000 */
 };
 
 &reg_dldo1 {
-	status = "okay";
 	regulator-min-microvolt = <3300000>;
 	regulator-max-microvolt = <3300000>;
 	regulator-name = "vcc-3V3-Wifi_unused";
@@ -431,17 +414,28 @@ vip_dev1_afvdd_vol = 2800000 */
 	regulator-name = "iovdd-2v8-csi";
 };
 
+/*
 &reg_ldo_io0 {
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "ldo_csiavdd";
 	status = "okay";
+};*/
+
+&axp_gpio {
+	gpio1_ldo_pin: gpio1-ldo-pin {
+		pins = "GPIO1";
+		function = "ldo";
+	};
 };
 
 &reg_ldo_io1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&gpio1_ldo_pin>;
+	regulator-always-on;
 	regulator-min-microvolt = <3000000>;
 	regulator-max-microvolt = <3000000>;
-	regulator-name = "i2C0-iovcc";
+	regulator-name = "i2c0-iovcc";
  	status = "okay";
  };
 
