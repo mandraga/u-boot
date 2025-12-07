@@ -414,24 +414,28 @@ vip_dev1_afvdd_vol = 2800000 */
 	regulator-name = "iovdd-2v8-csi";
 };
 
-/*
+
 &reg_ldo_io0 {
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "ldo_csiavdd";
 	status = "okay";
-};*/
+};
 
 &axp_gpio {
+	status = "disabled";
+	/*
 	gpio1_ldo_pin: gpio1-ldo-pin {
 		pins = "GPIO1";
 		function = "ldo";
 	};
+	*/
 };
 
+//	pinctrl-names = "default";
+//	pinctrl-0 = <&gpio1_ldo_pin>;
+
 &reg_ldo_io1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&gpio1_ldo_pin>;
 	regulator-always-on;
 	regulator-min-microvolt = <3000000>;
 	regulator-max-microvolt = <3000000>;
