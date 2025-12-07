@@ -422,18 +422,10 @@ vip_dev1_afvdd_vol = 2800000 */
 	status = "okay";
 };
 
+// Disable otherwise the gpio ldo won't output anything
 &axp_gpio {
 	status = "disabled";
-	/*
-	gpio1_ldo_pin: gpio1-ldo-pin {
-		pins = "GPIO1";
-		function = "ldo";
-	};
-	*/
 };
-
-//	pinctrl-names = "default";
-//	pinctrl-0 = <&gpio1_ldo_pin>;
 
 &reg_ldo_io1 {
 	regulator-always-on;
@@ -536,8 +528,11 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     touchscreen@38 {
         compatible = "edt,edt-ft5x06";
         reg = <0x38>;
-        reset-gpios = <&pio 6 10 GPIO_ACTIVE_LOW>; // PG10: port G (6), pin 10
+		interrupt-parent = <&pio>;
+		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5
+		reset-gpios = <&pio 6 10 GPIO_ACTIVE_LOW>; // PG10: port G (6), pin 10
 		vcc-supply = <&reg_dcdc1>;
+		iovcc-supply = <&reg_ldo_io1>;
         touchscreen-size-x = <480>;
         touchscreen-size-y = <800>;
         touchscreen-inverted-x = <0>;
@@ -545,18 +540,9 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
         touchscreen-swapped-x-y = <0>;
         wakeup-source;
         status = "okay";
-		//iovcc-supply = <&i2C0-iovcc>;
     };
 };
-/*
-&i2c1 {
-	status = "okay";
-};
 
-&i2c2 {
-	status = "okay";
-};
-*/
 /*
 &usbphy {
 	compatible = "allwinner,sun8i-a23-usb-phy";
