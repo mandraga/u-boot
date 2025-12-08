@@ -102,6 +102,7 @@
 		iovcc-supply = <&reg_eldo2>;
 		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
 
+		// Test whith kmscube or modetest
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: timing0 {
@@ -109,10 +110,10 @@
 				hactive = <480>;
 				vactive = <800>;
 				hback-porch = <44>;
-				hfront-porch = <(575 - 480 - 44 - 6)>; // calculate as needed
+				hfront-porch = <45>;
 				hsync-len = <6>;
 				vback-porch = <16>;
-				vfront-porch = <(896 - 800 - 16 - 1)>; // calculate as needed
+				vfront-porch = <79>;
 				vsync-len = <1>;
 				hsync-active = <0>;
 				vsync-active = <0>;
@@ -143,20 +144,11 @@
 
 &dsi {
 	status = "okay";
-
     port {
         dsi0_out: endpoint@0 {
             remote-endpoint = <&panel_in>;
         };
     };
-};
-
-&dsi_in_tcon0 {
-	remote-endpoint = <&tcon0_out_dsi>;
-};
-
-&tcon0_out_dsi{
-	remote-endpoint = <&dsi_in_tcon0>;
 };
 
 &tcon0 {
