@@ -85,6 +85,7 @@
 		};
 	};
 /*
+
 	csi: camera@1cb0000 {
 		compatible = "allwinner,sun8i-a83t-csi";
 		reg = <0x01cb0000 0x1000>;
@@ -94,24 +95,21 @@
 				<&ccu CLK_DRAM_CSI>;
 		clock-names = "bus", "mod", "ram";
 		resets = <&ccu RST_BUS_CSI>;
-		status = "disabled";
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&csi_8bit_parallel_pins>;
+		port {
+			csi_ep: endpoint {
+				remote-endpoint = <&gc2145>;
+				bus-width = <8>;
+				data-shift = <0>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				pclk-sample = <1>;
+			};
+		};
 	};
-&csi {
-    status = "okay";
-    pinctrl-names = "default";
-    pinctrl-0 = <&csi_8bit_parallel_pins>;
-    port {
-        csi_ep: endpoint {
-            remote-endpoint = <&gc2145>;
-            bus-width = <8>;
-            data-shift = <0>;
-            hsync-active = <0>;
-            vsync-active = <0>;
-            pclk-sample = <1>;
-        };
-    };
-	
-};*/
+*/
 
 	backlight: backlight {
 		compatible = "pwm-backlight";
@@ -357,7 +355,7 @@
 
 // Disabled if no camera connected
 &reg_dldo3 {
-	status = "disabled";
+	regulator-always-on; // status = "disabled"; remove when camera is on
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "iovdd-2v8-csi";
@@ -369,6 +367,7 @@
 };
 
 &reg_ldo_io0 {
+	regulator-always-on;
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "ldo_csiavdd";
@@ -493,7 +492,8 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 
 &i2c1 {
     status = "okay";
-/*
+
+	/*
 	camera@3c {
 		compatible = "galaxycore,gc2145";
 		reg = <0x3c>;
@@ -614,17 +614,3 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 	};
     */
 };
-
-/*
-&mipi_csi {
-    status = "okay";
-    pinctrl-names = "default";
-    pinctrl-0 = <&mipi_csi_pins>;
-    port {
-        mipi_csi_ep: endpoint {
-            remote-endpoint = <&gc2145>;
-            data-lanes = <1 2>;
-        };
-    };
-};
-*/
