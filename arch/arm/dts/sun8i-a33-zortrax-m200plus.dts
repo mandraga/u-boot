@@ -85,7 +85,7 @@
 		};
 	};
 /*
-
+	The mainline kernel has no suport for csi on A33
 	csi: camera@1cb0000 {
 		compatible = "allwinner,sun8i-a83t-csi";
 		reg = <0x01cb0000 0x1000>;
@@ -108,8 +108,7 @@
 				pclk-sample = <1>;
 			};
 		};
-	};
-*/
+	};*/
 
 	backlight: backlight {
 		compatible = "pwm-backlight";
@@ -323,16 +322,15 @@
 
 // It does not start
 &reg_eldo2 {
-	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-csi";
 	vin-supply = <&reg_dcdc1>;
 };
 
-// 
+// Used by the camera in the fex file
 &reg_eldo3 {
-	regulator-always-on;
+	status = "disabled"; // replace with regulator-always-on; if the camera is on
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "vcc-2v8-csi";
@@ -355,7 +353,7 @@
 
 // Disabled if no camera connected
 &reg_dldo3 {
-	regulator-always-on; // status = "disabled"; remove when camera is on
+	status = "disabled"; // remove if the camera is on
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "iovdd-2v8-csi";
@@ -371,7 +369,7 @@
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "ldo_csiavdd";
-	status = "okay";
+	status = "disabled"; // remove if the camera is on
 };
 
 &reg_ldo_io1 {
@@ -490,19 +488,19 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     };
 };
 
+/* The mainline kernel has no suport for csi on A33
 &i2c1 {
     status = "okay";
 
-	/*
-	camera@3c {
+	camera@42 {
 		compatible = "galaxycore,gc2145";
-		reg = <0x3c>;
+		reg = <0x42>;
 		clocks = <&clk_ext_camera>;
 		iovdd-supply = <&reg_dldo3>;
 		avdd-supply = <&reg_ldo_io0>;
 		dvdd-supply = <&reg_eldo2>;
-		powerdown-gpios = <&pio 4 14 GPIO_ACTIVE_HIGH>; // PE14
-		reset-gpios = <&pio 4 15 GPIO_ACTIVE_LOW>; // PE15
+		powerdown-gpios = <&pio 4 14 (GPIO_ACTIVE_LOW | GPIO_PUSH_PULL)>; // PE14
+		reset-gpios = <&pio 4 15 (GPIO_ACTIVE_LOW | GPIO_PUSH_PULL)>; // PE15
 
 		port {
 			endpoint {
@@ -511,8 +509,8 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 				link-frequencies = /bits/ 64 <120000000 192000000 240000000>;
 			};
 		};
-	};*/
-};
+	};
+};*/
 
 &usb_otg {
 	dr_mode = "otg";
