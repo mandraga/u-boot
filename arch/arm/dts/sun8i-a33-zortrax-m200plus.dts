@@ -46,7 +46,6 @@
 #include "sunxi-common-regulators.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/input/input.h>
 #include <dt-bindings/pwm/pwm.h>
 
 / {
@@ -85,6 +84,34 @@
 			gpios = <&pio 2 2 GPIO_ACTIVE_HIGH>;  // PC02: port C (2), pin 2
 		};
 	};
+/*
+	csi: camera@1cb0000 {
+		compatible = "allwinner,sun8i-a83t-csi";
+		reg = <0x01cb0000 0x1000>;
+		interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&ccu CLK_BUS_CSI>,
+				<&ccu CLK_CSI_SCLK>,
+				<&ccu CLK_DRAM_CSI>;
+		clock-names = "bus", "mod", "ram";
+		resets = <&ccu RST_BUS_CSI>;
+		status = "disabled";
+	};
+&csi {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&csi_8bit_parallel_pins>;
+    port {
+        csi_ep: endpoint {
+            remote-endpoint = <&gc2145>;
+            bus-width = <8>;
+            data-shift = <0>;
+            hsync-active = <0>;
+            vsync-active = <0>;
+            pclk-sample = <1>;
+        };
+    };
+	
+};*/
 
 	backlight: backlight {
 		compatible = "pwm-backlight";
@@ -100,8 +127,9 @@
 		backlight = <&backlight>;
 		vcc-supply = <&reg_dc1sw>;
 		iovcc-supply = <&reg_eldo2>;
-		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
-
+		enable-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
+		dsi-lanes = <2>;
+	
 		// Test whith kmscube or modetest
 		display-timings {
 			native-mode = <&timing0>;
@@ -123,7 +151,7 @@
 		};
         port {
             panel_in: endpoint {
-                remote-endpoint = <&dsi0_out>;
+                remote-endpoint = <&dsi_out_panel>;
             };
         };
 	};
@@ -133,10 +161,6 @@
 &codec {
 	status = "disabled";
 };
-/*
-&simplefb_lcd {
-	vcc-lcd-supply = <&reg_dc1sw>;
-};*/
 
 &de {
 	status = "okay";
@@ -145,7 +169,8 @@
 &dsi {
 	status = "okay";
     port {
-        dsi0_out: endpoint@0 {
+        dsi_out_panel: endpoint@1 {
+			data-lanes = <1 2>;
             remote-endpoint = <&panel_in>;
         };
     };
@@ -218,6 +243,7 @@
 		interrupt-parent = <&r_intc>;
 		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
 		eldoin-supply = <&reg_dcdc1>;
+		drivevbus-supply = <&reg_vcc5v0>;
 		x-powers,drive-vbus-en;
 	};
 };
@@ -280,14 +306,7 @@
 	regulator-max-microvolt = <1200000>;
 	regulator-name = "vdd-cpu";
 };
-/*
-&reg_dcdc4 {
-	regulator-always-on;
-	regulator-min-microvolt = <1100000>;
-	regulator-max-microvolt = <1100000>;
-	regulator-name = "vdd-sys";
-};
-*/
+
 &reg_dcdc5 {
 	regulator-always-on;
 	regulator-min-microvolt = <1500000>;
@@ -304,15 +323,6 @@
 	vin-supply = <&reg_dcdc1>;
 };
 
-/*vip_dev1_iovdd = "axp22_dldo3"
-vip_dev1_iovdd_vol = 2800000
-vip_dev1_avdd = "axp22_ldoio0"
-vip_dev1_avdd_vol = 2800000
-vip_dev1_dvdd = "axp22_eldo2"
-vip_dev1_dvdd_vol = 1800000
-vip_dev1_afvdd = "axp22_eldo3"
-vip_dev1_afvdd_vol = 2800000 */
-
 // It does not start
 &reg_eldo2 {
 	regulator-always-on;
@@ -324,6 +334,7 @@ vip_dev1_afvdd_vol = 2800000 */
 
 // 
 &reg_eldo3 {
+	regulator-always-on;
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "vcc-2v8-csi";
@@ -352,17 +363,16 @@ vip_dev1_afvdd_vol = 2800000 */
 	regulator-name = "iovdd-2v8-csi";
 };
 
+// Disable otherwise the gpio ldo won't output anything
+&axp_gpio {
+	status = "disabled";
+};
 
 &reg_ldo_io0 {
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "ldo_csiavdd";
 	status = "okay";
-};
-
-// Disable otherwise the gpio ldo won't output anything
-&axp_gpio {
-	status = "disabled";
 };
 
 &reg_ldo_io1 {
@@ -481,6 +491,29 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     };
 };
 
+&i2c1 {
+    status = "okay";
+/*
+	camera@3c {
+		compatible = "galaxycore,gc2145";
+		reg = <0x3c>;
+		clocks = <&clk_ext_camera>;
+		iovdd-supply = <&reg_dldo3>;
+		avdd-supply = <&reg_ldo_io0>;
+		dvdd-supply = <&reg_eldo2>;
+		powerdown-gpios = <&pio 4 14 GPIO_ACTIVE_HIGH>; // PE14
+		reset-gpios = <&pio 4 15 GPIO_ACTIVE_LOW>; // PE15
+
+		port {
+			endpoint {
+				remote-endpoint = <&mipid02_0>;
+				data-lanes = <1 2>;
+				link-frequencies = /bits/ 64 <120000000 192000000 240000000>;
+			};
+		};
+	};*/
+};
+
 &usb_otg {
 	dr_mode = "otg";
 	status = "okay";
@@ -533,6 +566,21 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 		allwinner,function = "uart2";
 	};
 /*
+	/omit-if-no-ref/
+	csi_8bit_parallel_pins: csi-8bit-parallel-pins {
+		pins = "PE0", "PE2", "PE3", "PE6", "PE7",
+				"PE8", "PE9", "PE10", "PE11",
+				"PE12", "PE13";
+		function = "csi";
+	};
+
+	/omit-if-no-ref/
+	csi_mclk_pin: csi-mclk-pin {
+		pins = "PE1";
+		function = "csi";
+	};*/
+
+/*
     /* PB3 "Clear To Send" in conflict with power button led gpio...
     uart2_cts_rts_pb_pins: uart2-cts-rts-pb-pins {
         pins = "PB2", "PB3";
@@ -567,24 +615,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     */
 };
 
-
-/* 
-&csi {
-    status = "okay";
-    pinctrl-names = "default";
-    pinctrl-0 = <&csi_pins>;
-    port {
-        csi_ep: endpoint {
-            remote-endpoint = <&gc2145>;
-            bus-width = <4>;
-            data-shift = <0>;
-            hsync-active = <0>;
-            vsync-active = <0>;
-            pclk-sample = <1>;
-        };
-    };
-};
-
+/*
 &mipi_csi {
     status = "okay";
     pinctrl-names = "default";
@@ -596,25 +627,4 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
         };
     };
 };
-
-gc2145: camera@3c {
-    compatible = "galaxycore,gc2145";
-    reg = <0x3c>;
-    clocks = <&clk_ext_camera>;
-    iovdd-supply = <&scmi_v3v3_sw>;
-    avdd-supply = <&scmi_v3v3_sw>;
-    dvdd-supply = <&scmi_v3v3_sw>;
-    powerdown-gpios = <&mcp23017 3 (GPIO_ACTIVE_LOW | GPIO_PUSH_PULL)>;
-    reset-gpios = <&mcp23017 4 (GPIO_ACTIVE_LOW | GPIO_PUSH_PULL)>;
-    status = "okay";
-
-    port {
-        gc2145_ep: endpoint {
-            remote-endpoint = <&mipid02_0>;
-            data-lanes = <1 2>;
-            link-frequencies = /bits/ 64 <120000000 192000000 240000000>;
-        };
-    };
-};
- */
- 
+*/
