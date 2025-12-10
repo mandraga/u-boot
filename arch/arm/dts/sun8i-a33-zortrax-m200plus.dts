@@ -111,22 +111,25 @@
 	};*/
 
 	backlight: backlight {
+		status = "okay";
 		compatible = "pwm-backlight";
 		pwms = <&pwm 0 50000 PWM_POLARITY_INVERTED>;
 		brightness-levels = <0 1 2 3 4 5 6 7 8 9 10 >;
 		default-brightness-level = <8>;
 		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
-		power-supply = <&reg_dc1sw>;
 	};
-	
+/* 
 	panel: panel {
+		status = "okay";
 		compatible = "microtech,mtf0397swi-06";
 		backlight = <&backlight>;
 		vcc-supply = <&reg_dc1sw>;
 		iovcc-supply = <&reg_eldo2>;
-		enable-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
+		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
 		dsi-lanes = <2>;
-	
+		//dsi-format = <0>;
+		*/
+	/*
 		// Test whith kmscube or modetest
 		display-timings {
 			native-mode = <&timing0>;
@@ -146,17 +149,23 @@
 				pixelclk-active = <1>;
 			};
 		};
-        port {
-            panel_in: endpoint {
-                remote-endpoint = <&dsi_out_panel>;
-            };
-        };
-	};
+		*/
+		/*
+		panel_in: port {
+			panel_in_dsi: endpoint {
+				remote-endpoint = <&dsi_out_panel>;
+			};
+		};*/
+	//};
 };
 
 // No audio
 &codec {
 	status = "disabled";
+};
+
+&drc0 {
+    status = "okay";
 };
 
 &de {
@@ -165,19 +174,32 @@
 
 &dsi {
 	status = "okay";
-    port {
-        dsi_out_panel: endpoint@1 {
-			data-lanes = <1 2>;
-            remote-endpoint = <&panel_in>;
-        };
-    };
+	vcc-dsi-supply = <&reg_eldo2>;
+	// /delete-node/ port;
+	/*
+	dsi_out: port@1 {
+		dsi_out_panel: endpoint {
+			remote-endpoint = <&panel_in_dsi>;
+			//data-lanes = <1 2>;
+		};
+	};*/
+	panel@0 {
+		status = "okay";
+		compatible = "microtech,mtf0397swi-06";
+		reg = <0>;
+		backlight = <&backlight>;
+		vcc-supply = <&reg_dc1sw>;
+		iovcc-supply = <&reg_eldo2>;
+		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
+		dsi-lanes = <2>;
+	};
 };
 
 &tcon0 {
 	status = "okay";
 };
 
-// Mipi dphy
+// Mipi dsi dphy
 &dphy {
     status = "okay";
 };
@@ -317,15 +339,14 @@
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-1v8-unknownusage_1";
-	vin-supply = <&reg_dcdc1>;
 };
 
-// It does not start
+// Related to lcd and dsi power
 &reg_eldo2 {
+	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
-	regulator-name = "vcc-1v8-csi";
-	vin-supply = <&reg_dcdc1>;
+	regulator-name = "vcc-dsi";
 };
 
 // Used by the camera in the fex file
@@ -334,7 +355,6 @@
 	regulator-min-microvolt = <2800000>;
 	regulator-max-microvolt = <2800000>;
 	regulator-name = "vcc-2v8-csi";
-	vin-supply = <&reg_dcdc1>;
 };
 
 &reg_dldo1 {
