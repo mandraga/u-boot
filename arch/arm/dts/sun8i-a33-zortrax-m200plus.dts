@@ -118,45 +118,6 @@
 		default-brightness-level = <8>;
 		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
 	};
-/* 
-	panel: panel {
-		status = "okay";
-		compatible = "microtech,mtf0397swi-06";
-		backlight = <&backlight>;
-		vcc-supply = <&reg_dc1sw>;
-		iovcc-supply = <&reg_eldo2>;
-		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
-		dsi-lanes = <2>;
-		//dsi-format = <0>;
-		*/
-	/*
-		// Test whith kmscube or modetest
-		display-timings {
-			native-mode = <&timing0>;
-			timing0: timing0 {
-				clock-frequency = <31000000>;
-				hactive = <480>;
-				vactive = <800>;
-				hback-porch = <44>;
-				hfront-porch = <45>;
-				hsync-len = <6>;
-				vback-porch = <16>;
-				vfront-porch = <79>;
-				vsync-len = <1>;
-				hsync-active = <0>;
-				vsync-active = <0>;
-				de-active = <1>;
-				pixelclk-active = <1>;
-			};
-		};
-		*/
-		/*
-		panel_in: port {
-			panel_in_dsi: endpoint {
-				remote-endpoint = <&dsi_out_panel>;
-			};
-		};*/
-	//};
 };
 
 // No audio
@@ -172,17 +133,18 @@
 	status = "okay";
 };
 
+// got to armbian 9333893d74ece9362fc3459e27f405b68e65e1da to get kernel current at 6.1.56
+// gitk config/kernel/linux-sunxi-current.config
+// and do not forget to enable CONFIG_TOUCHSCREEN_EDT_FT5X06=y
+// this page is great https://docs.armsom.org/interface-usage/screen
+// dtc -I fs /proc/device-tree > devicetree.txt
+// apt update && sudo apt install libdrm-tests mesa-utils kmscube
+//
 &dsi {
+	vcc-dsi-supply = <&reg_dc1sw>;
+ 	data-lanes = <1 2>;
 	status = "okay";
-	vcc-dsi-supply = <&reg_eldo2>;
-	// /delete-node/ port;
-	/*
-	dsi_out: port@1 {
-		dsi_out_panel: endpoint {
-			remote-endpoint = <&panel_in_dsi>;
-			//data-lanes = <1 2>;
-		};
-	};*/
+
 	panel@0 {
 		status = "okay";
 		compatible = "microtech,mtf0397swi-06";
