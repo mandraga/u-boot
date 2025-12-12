@@ -140,9 +140,9 @@
 // dtc -I fs /proc/device-tree > devicetree.txt
 // apt update && sudo apt install libdrm-tests mesa-utils kmscube
 //
+// https://youtu.be/ML3nHiRdyWw?si=DvBYjZZ03krspNuh
 &dsi {
 	vcc-dsi-supply = <&reg_dc1sw>;
- 	data-lanes = <1 2>;
 	status = "okay";
 
 	panel@0 {
@@ -153,7 +153,6 @@
 		vcc-supply = <&reg_dc1sw>;
 		iovcc-supply = <&reg_eldo2>;
 		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
-		dsi-lanes = <2>;
 	};
 };
 
