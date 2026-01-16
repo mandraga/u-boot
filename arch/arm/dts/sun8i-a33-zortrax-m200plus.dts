@@ -75,15 +75,36 @@
 		};
         
         // Those are not leds but reusing the gpio-leds driver to export them
-        led-mcu-nrst {
-			label = "mcunrst:led1:usr";
-			gpios = <&pio 5 1 GPIO_ACTIVE_LOW>;   // PF01: port F (5), pin 1
+		led-gpio6 {
+			label = "gpio6:usr";
+			gpios = <&pio 2 1 GPIO_ACTIVE_LOW>;   // PC01: port C (2), pin 1
 		};
-        led-mcu-boot {
-			label = "mcuboot:led1:usr";
+
+		led-aldohc {
+			label = "aldohc:usr";
+			gpios = <&pio 2 0 GPIO_ACTIVE_LOW>;   // PC00: port C (2), pin 0
+		};
+
+		led-boot {
+			label = "boot:usr";
 			gpios = <&pio 2 2 GPIO_ACTIVE_HIGH>;  // PC02: port C (2), pin 2
 		};
-	};
+
+		led-gpios {
+			label = "gpios:usr";
+			gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>;  // PC03: port C (2), pin 3
+		};
+
+		led-nrst {
+			label = "nrst:usr";
+			gpios = <&pio 5 1 GPIO_ACTIVE_LOW>;   // PF01: port F (5), pin 1
+		};
+
+		led-slp {
+			label = "slp:usr";
+			gpios = <&pio 5 0 GPIO_ACTIVE_LOW>;   // PF00: port F (5), pin 0
+		};
+};
 /*
 	The mainline kernel has no suport for csi on A33
 	csi: camera@1cb0000 {
@@ -133,7 +154,6 @@
 	status = "okay";
 };
 
-// got to armbian 9333893d74ece9362fc3459e27f405b68e65e1da to get kernel current at 6.1.56
 // gitk config/kernel/linux-sunxi-current.config
 // and do not forget to enable CONFIG_TOUCHSCREEN_EDT_FT5X06=y
 // this page is great https://docs.armsom.org/interface-usage/screen
