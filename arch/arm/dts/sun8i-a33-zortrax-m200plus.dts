@@ -68,10 +68,10 @@
 			label = "blue-led:usr";
 			gpios = <&pio 4 16 GPIO_ACTIVE_LOW>;  // PE16: port E (4), pin 16
 		};
-
+		// The power button led control pin
         power-button-led {
 			label = "power-button-led:usr";
-			gpios = <&pio 1 2 GPIO_ACTIVE_LOW>;   // PB02: port B (1), pin 2
+			gpios = <&pio 1 2 GPIO_ACTIVE_HIGH>;   // PB02: port B (1), pin 2
 		};
         
         // Those are not leds but reusing the gpio-leds driver to export them
