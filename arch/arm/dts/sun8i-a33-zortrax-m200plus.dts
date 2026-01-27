@@ -138,6 +138,7 @@
 		brightness-levels = <0 1 2 3 4 5 6 7 8 9 10 >;
 		default-brightness-level = <8>;
 		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
+		power-supply = <&reg_dc1sw>;
 	};
 };
 
@@ -162,17 +163,17 @@
 //
 // https://youtu.be/ML3nHiRdyWw?si=DvBYjZZ03krspNuh
 &dsi {
-	vcc-dsi-supply = <&reg_dc1sw>;
 	status = "okay";
+	vcc-dsi-supply = <&reg_eldo1>;
 
 	panel@0 {
 		status = "okay";
 		compatible = "microtech,mtf0397swi-06";
 		reg = <0>;
-		backlight = <&backlight>;
 		vcc-supply = <&reg_dc1sw>;
 		iovcc-supply = <&reg_eldo2>;
 		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
+		backlight = <&backlight>;
 	};
 };
 
@@ -316,10 +317,10 @@
 
 // rf section in the fex file
 &reg_eldo1 {
-	status = "disabled";
+	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
-	regulator-name = "vcc-1v8-unknownusage_1";
+	regulator-name = "vcc-dsi";
 };
 
 // Related to lcd and dsi power
@@ -327,7 +328,7 @@
 	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
-	regulator-name = "vcc-dsi";
+	regulator-name = "vcc-dsi-iovcc";
 };
 
 // Used by the camera in the fex file
