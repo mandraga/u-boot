@@ -51,16 +51,16 @@
 	aliases {
 		serial0 = &r_uart;
 		/* Make u-boot set mac-address for rtl8703as (no eeprom) */
-		//ethernet0 = &rtl8703as;
+		ethernet0 = &rtl8703as;
 	};
-/*
+
 	wifi_pwrseq: pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		pinctrl-names = "default";
 		pinctrl-0 = <&wifi_pwrseq_pin_ezeetab>;
 		post-power-on-delay-ms = <200>;
 	};
-*/
+
 	panel: panel {
 		// Tablet dts should provide panel compatible 
 		backlight = <&backlight>;
@@ -73,7 +73,6 @@
 			};
 		};
 	};
-
 };
 
 &de {
@@ -151,6 +150,11 @@
 };
 
 &pio {
+    vcc-pb-supply = <&reg_dcdc1>;
+    vcc-pf-supply = <&reg_dcdc1>;
+    vcc-pg-supply = <&reg_dcdc1>;
+	vcc-ph-supply = <&reg_dcdc1>;
+	vcc-pl-supply = <&reg_dcdc1>;
    /*
 	mmc0_pins: mmc0-pins {
 		pins = "PF0", "PF1", "PF2",
@@ -167,39 +171,39 @@
    };
 */
 };
-/*
+
+/**
+PL4:  wl_reg_on
+PL6:  rf chip_en
+PL7:  wl_host_wake
+PL8:  bt_rst
+PL9:  bt_wake
+PL10: bt_host_wake
+*/
 &r_pio {
 	wifi_pwrseq_pin_ezeetab: wifi-pwrseq-pins {
 		pins = "PL4", "PL6", "PL7", "PL8", "PL9", "PL10";
 		function = "gpio_in";
 		bias-pull-up;
 	};
-};*/
+};
 
 &mmc1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc1_pg_pins>;
 	vmmc-supply = <&reg_dldo1>;
-	//mmc-pwrseq = <&wifi_pwrseq>;
+	mmc-pwrseq = <&wifi_pwrseq>;
 	bus-width = <4>;
 	non-removable;
 	status = "okay";
 
 	rtl8703as: wifi@1 {
 		reg = <1>;
+		interrupt-parent = <&r_pio>;
+		interrupts = <0 7 IRQ_TYPE_LEVEL_LOW>; // PL7
+		interrupt-names = "host-wake";
 	};
 };
-
-/*
-[wifi_para]
-wifi_used = 1
-wifi_sdc_id = 1
-wifi_usbc_id = 1
-wifi_usbc_type = 1
-wl_reg_on = port:PL04<1><default><default><0>    // GPIO output active high
-wl_host_wake = port:PL07<4><default><default><0> // Inyterrupt
-wl_host_wake_invert = 0
-*/
 
 /*
 	rtl8703as: wifi@1 {
@@ -211,18 +215,21 @@ wl_host_wake_invert = 0
 		interrupts = <0 7 IRQ_TYPE_LEVEL_LOW>; // PL7
 		interrupt-names = "host-wake";
 	};
-/*
+*/
+
 &uart1 {
 	pinctrl-names = "default";
+    pinctrl-0 = <&uart1_pg_pins>, <&uart1_cts_rts_pg_pins>;
+    uart-has-rtscts;
 	status = "okay";
+
     bluetooth {
         compatible = "realtek,rtl8703as-bt";
-        device-wake-gpios = <&pio 11 10 GPIO_ACTIVE_HIGH>; // PL10
-        enable-gpios = <&pio 11 8 GPIO_ACTIVE_HIGH>; // PL08
-        host-wake-gpios = <&pio 11 9 GPIO_ACTIVE_LOW>; // PL09
+        enable-gpios = <&pio 0 8 GPIO_ACTIVE_HIGH>;       // PL08
+        host-wake-gpios = <&pio 0 9 GPIO_ACTIVE_LOW>;     // PL09
+        device-wake-gpios = <&pio 0 10 GPIO_ACTIVE_HIGH>; // PL10
 	};
-};*/
-
+};
 
 &mmc2 {
 	pinctrl-names = "default";
