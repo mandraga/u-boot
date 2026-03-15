@@ -42,21 +42,29 @@
 
 /dts-v1/;
 #include "sun8i-a33.dtsi"
-//#include "sunxi-reference-design-tablet.dtsi"
 #include "sun8i-reference-design-tablet.dtsi"
 
 / {
 	model = "Ezeetab96Q10 A33 Tablet";
-	compatible = "allwinner,q8-a33", "allwinner,sun8i-a33";
+	compatible = "allwinner,Ezeetab96Q10-a33", "allwinner,sun8i-a33";
 
 	aliases {
 		serial0 = &r_uart;
+		/* Make u-boot set mac-address for rtl8703as (no eeprom) */
+		//ethernet0 = &rtl8703as;
 	};
-/* 
+/*
+	wifi_pwrseq: pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_pwrseq_pin_ezeetab>;
+		post-power-on-delay-ms = <200>;
+	};
+*/
 	panel: panel {
 		// Tablet dts should provide panel compatible 
 		backlight = <&backlight>;
-		enable-gpios = <&pio 7 7 GPIO_ACTIVE_HIGH>; // PH7 
+		enable-gpios = <&pio 7 6 GPIO_ACTIVE_HIGH>; // PH6 
 		power-supply = <&reg_dc1sw>;
 
 		port {
@@ -65,23 +73,156 @@
 			};
 		};
 	};
-	*/
+
 };
-/*
+
 &de {
 	status = "okay";
-};*/
+};
 
 &ehci0 {
+	status = "okay";
+};
+
+&ohci0 {
+	status = "okay";
+};
+
+// It is already in the sun8i tablet reference design
+&touchscreen {
+	compatible = "silead,gsl3670";
+	firmware-name = "gsl3670-polaroid-mid2809pxe04.fw";
+	touchscreen-size-x = <1280>;
+	touchscreen-size-y = <800>;
+	touchscreen-inverted-x;
+	touchscreen-swapped-x-y;
+	interrupt-parent = <&pio>;
+	interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5
+	reset-gpios = <&pio 6 10 GPIO_ACTIVE_LOW>; // PG10: port G (6), pin 10
+	vcc-supply = <&reg_dcdc1>;
+	iovcc-supply = <&reg_ldo_io1>;
 	status = "okay";
 };
 
 &mmc0 {
 	vmmc-supply = <&reg_dcdc1>;
 	bus-width = <4>;
-	cd-gpios = <&pio 1 4 GPIO_ACTIVE_LOW>; /* PB4 */
+	// TODO probe at the oscilloscope
+	//cd-gpios = <&pio 1 4 GPIO_ACTIVE_LOW>; /* PB4 needs a pull up */
+	non-removable;
 	status = "okay";
 };
+
+// Disable otherwise the gpio ldo won't output anything
+&axp_gpio {
+	status = "disabled";
+};
+
+&reg_ldo_io0 {
+	regulator-always-on;
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+	regulator-name = "vcc-2V8-csi-avdd";
+ 	status = "okay";
+};
+
+&reg_ldo_io1 {
+	regulator-always-on;
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "vcc-3V3-touchscreen";
+ 	status = "okay";
+};
+
+&reg_eldo2 {
+	regulator-always-on;
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+	regulator-name = "vcc-1V8-csi-dvdd";
+ 	status = "okay";
+};
+
+&reg_dldo1 {
+	regulator-always-on;
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "vcc-3V3-Wifi";
+ 	status = "okay";
+};
+
+&pio {
+   /*
+	mmc0_pins: mmc0-pins {
+		pins = "PF0", "PF1", "PF2",
+				"PF3", "PF4", "PF5";
+		function = "mmc0";
+		drive-strength = <30>;
+		bias-pull-up;
+	};
+
+   mmc0_cd_pin: mmc0-cd-pin {
+    pins = "PB4";
+    function = "cd-gpios";
+    bias-pull-up;
+   };
+*/
+};
+/*
+&r_pio {
+	wifi_pwrseq_pin_ezeetab: wifi-pwrseq-pins {
+		pins = "PL4", "PL6", "PL7", "PL8", "PL9", "PL10";
+		function = "gpio_in";
+		bias-pull-up;
+	};
+};*/
+
+&mmc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc1_pg_pins>;
+	vmmc-supply = <&reg_dldo1>;
+	//mmc-pwrseq = <&wifi_pwrseq>;
+	bus-width = <4>;
+	non-removable;
+	status = "okay";
+
+	rtl8703as: wifi@1 {
+		reg = <1>;
+	};
+};
+
+/*
+[wifi_para]
+wifi_used = 1
+wifi_sdc_id = 1
+wifi_usbc_id = 1
+wifi_usbc_type = 1
+wl_reg_on = port:PL04<1><default><default><0>    // GPIO output active high
+wl_host_wake = port:PL07<4><default><default><0> // Inyterrupt
+wl_host_wake_invert = 0
+*/
+
+/*
+	rtl8703as: wifi@1 {
+		reg = <1>;
+	};
+	rtl8703as: wifi@1 {
+		reg = <1>;
+		interrupt-parent = <&r_pio>;
+		interrupts = <0 7 IRQ_TYPE_LEVEL_LOW>; // PL7
+		interrupt-names = "host-wake";
+	};
+/*
+&uart1 {
+	pinctrl-names = "default";
+	status = "okay";
+    bluetooth {
+        compatible = "realtek,rtl8703as-bt";
+        device-wake-gpios = <&pio 11 10 GPIO_ACTIVE_HIGH>; // PL10
+        enable-gpios = <&pio 11 8 GPIO_ACTIVE_HIGH>; // PL08
+        host-wake-gpios = <&pio 11 9 GPIO_ACTIVE_LOW>; // PL09
+	};
+};*/
+
 
 &mmc2 {
 	pinctrl-names = "default";
@@ -98,35 +239,26 @@
 	drive-strength = <40>;
 };
 
-/*
-&mmc1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc1_pg_pins>;
-	vmmc-supply = <&reg_dldo1>;
-	bus-width = <4>;
-	non-removable;
-	status = "okay";
-
-	rtl8703as: wifi@1 {
-		reg = <1>;
-	};
-};
-
-&mmc2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc2_8bit_pins>;
-	vmmc-supply = <&reg_dcdc1>;
-	bus-width = <8>;
-	non-removable;
-	cap-mmc-hw-reset;
-	status = "okay";
-};
-*/
-/*
 &tcon0_out {
 	tcon0_out_lcd: endpoint@0 {
 		reg = <0>;
 		remote-endpoint = <&panel_input>;
 	};
-};*/
+};
 
+&sound {
+	status = "enabled";
+};
+
+/*
+&soc {
+
+	dai: dai@1c22c00 {
+		status = "enabled";
+	};
+
+	codec: codec@1c22e00 {
+		status = "enabled";
+	};
+};
+*/
