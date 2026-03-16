@@ -61,11 +61,29 @@
 		post-power-on-delay-ms = <200>;
 	};
 
-	panel: panel {
-		// Tablet dts should provide panel compatible 
-		backlight = <&backlight>;
-		enable-gpios = <&pio 7 6 GPIO_ACTIVE_HIGH>; // PH6 
+	backlight: backlight {
+		status = "okay";
+		compatible = "pwm-backlight";
+		pwms = <&pwm 0 50000 PWM_POLARITY_INVERTED>;
+		brightness-levels = <0 1 2 3 4 5 6 7 8 9 10 >;
+		default-brightness-level = <8>;
+		enable-gpios = <&pio 7 6 GPIO_ACTIVE_HIGH>; // PH6
 		power-supply = <&reg_dc1sw>;
+	};
+};
+
+&dsi {
+	status = "okay";
+	vcc-dsi-supply = <&reg_dc1sw>;
+
+	panel@0 {
+		status = "okay";
+		compatible = "boe,tv096wxm";
+		reg = <0>;
+		vcc-supply = <&reg_dc1sw>;
+		iovcc-supply = <&reg_eldo1>;
+		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
+		backlight = <&backlight>;
 
 		port {
 			panel_input: endpoint {
@@ -131,6 +149,14 @@
 	regulator-max-microvolt = <3300000>;
 	regulator-name = "vcc-3V3-touchscreen";
  	status = "okay";
+};
+
+&reg_eldo1 {
+	regulator-always-on;
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+	regulator-name = "vcc-2V8-lcd";
+ 	//status = "okay";
 };
 
 &reg_eldo2 {
