@@ -208,7 +208,7 @@
 	status = "okay";
 };
 */
-
+/*
 // For the Wifi chip on rev 1.1
 &mmc1 {
 	pinctrl-names = "default";
@@ -217,15 +217,17 @@
 	bus-width = <4>;
 	non-removable;
 	status = "okay";
-};
+};*/
 
 &mmc2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc2_8bit_pins>;
 	vmmc-supply = <&reg_dcdc1>;
-	bus-width = <8>;
+	bus-width = <4>;
+	max-frequency = <50000000>;
 	non-removable;
-	cap-mmc-hw-reset;
+	//cap-mmc-hw-reset;
+	//mmc-cap-sd-highspeed;
 	status = "okay";
 };
 
