@@ -482,9 +482,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 		iovcc-supply = <&reg_ldo_io1>;
         touchscreen-size-x = <480>;
         touchscreen-size-y = <800>;
-        touchscreen-inverted-x = <0>;
-        touchscreen-inverted-y = <1>;
-        touchscreen-swapped-x-y = <0>;
+        touchscreen-swapped-x-y;
         wakeup-source;
         status = "okay";
     };
