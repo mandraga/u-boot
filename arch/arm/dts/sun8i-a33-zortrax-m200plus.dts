@@ -174,7 +174,6 @@
 		iovcc-supply = <&reg_eldo2>;
 		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
 		backlight = <&backlight>;
-		rotation = <90>;
 	};
 };
 
@@ -474,7 +473,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     status = "okay";
 
     touchscreen@38 {
-        compatible = "edt,edt-ft5x06";
+        compatible = "focaltech,ft6236";
         reg = <0x38>;
 		interrupt-parent = <&pio>;
 		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5

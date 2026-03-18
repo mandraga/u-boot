@@ -39,7 +39,7 @@ CONFIG_ELDO1_VOL=1800
 CONFIG_DLDO2_VOL=1800
 
 # This line puts emmc dev 2 to 1
-#wdddCONFIG_MMC_SUNXI_SLOT_EXTRA=2
+#CONFIG_MMC_SUNXI_SLOT_EXTRA=2
 ## Try to reset the EMMC when chainloading u-boot
 #CONFIG_SPL_DM_RESET=y
 #CONFIG_DM_MMC=y
