@@ -104,7 +104,7 @@
 			label = "slp:usr";
 			gpios = <&pio 5 0 GPIO_ACTIVE_LOW>;   // PF00: port F (5), pin 0
 		};
-};
+	};
 /*
 	The mainline kernel has no suport for csi on A33
 	csi: camera@1cb0000 {
@@ -155,13 +155,6 @@
 	status = "okay";
 };
 
-// gitk config/kernel/linux-sunxi-current.config
-// and do not forget to enable CONFIG_TOUCHSCREEN_EDT_FT5X06=y
-// this page is great https://docs.armsom.org/interface-usage/screen
-// dtc -I fs /proc/device-tree > devicetree.txt
-// apt update && sudo apt install libdrm-tests mesa-utils kmscube
-//
-// https://youtu.be/ML3nHiRdyWw?si=DvBYjZZ03krspNuh
 &dsi {
 	status = "okay";
 	vcc-dsi-supply = <&reg_eldo1>;
@@ -199,35 +192,13 @@
 	status = "okay";
 };
 
-/* 
-// The SDIO pins are not connected.
-&mmc0 {
-	vmmc-supply = <&reg_dcdc1>;
-	bus-width = <4>;
-	//cd-gpios = <&pio 1 4 GPIO_ACTIVE_LOW>; PB4
-	status = "okay";
-};
-*/
-/*
-// For the Wifi chip on rev 1.1
-&mmc1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc1_pg_pins>;
-	vmmc-supply = <&reg_dldo1>;
-	bus-width = <4>;
-	non-removable;
-	status = "okay";
-};*/
-
 &mmc2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc2_8bit_pins>;
 	vmmc-supply = <&reg_dcdc1>;
 	bus-width = <4>;
-	max-frequency = <50000000>;
+	max-frequency = <25000000>;
 	non-removable;
-	//cap-mmc-hw-reset;
-	//mmc-cap-sd-highspeed;
 	status = "okay";
 };
 
@@ -258,7 +229,7 @@
 };
 
 &battery_power_supply {
-	status = "okay";
+	status = "disabled";
 };
 
 &reg_aldo1 {
@@ -414,26 +385,6 @@
 	status = "okay";
 };
 
-// Disabled bluetooth but uses some pins
-/*
-&uart1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1_xfer &uart1_cts &uart1_rts>;
-	uart-has-rtscts;
-	status = "disabled";
-
-	bluetooth {
-		compatible = "brcm,bcm4345c5";
-		clocks = <&r 1>;
-		clock-names = "lpo";
-		max-speed = <1500000>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&bt_host_wake_pin &bt_wake_pin &bt_reset_pin>;
-		vbat-supply = <&wifi_bat>;
-		vddio-supply = <&vcc_wl>;
-	};
-};
-*/
 
 &uart2 {
 	pinctrl-names = "default";
