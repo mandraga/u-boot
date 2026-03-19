@@ -140,6 +140,14 @@
 		enable-gpios = <&pio 1 6 GPIO_ACTIVE_HIGH>; // PB06
 		power-supply = <&reg_dc1sw>;
 	};
+
+	wifi_pwrseq: pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_pwrseq_pin_m200plus>;
+		post-power-on-delay-ms = <200>;
+	};
+
 };
 
 // No audio
@@ -157,13 +165,12 @@
 
 &dsi {
 	status = "okay";
-	vcc-dsi-supply = <&reg_eldo1>;
 
 	panel@0 {
 		status = "okay";
 		compatible = "microtech,mtf0397swi-06";
 		reg = <0>;
-		vcc-supply = <&reg_dc1sw>;
+		vcc-supply = <&reg_eldo1>;
 		iovcc-supply = <&reg_eldo2>;
 		reset-gpios = <&pio 7 9 GPIO_ACTIVE_LOW>; // PH09
 		backlight = <&backlight>;
@@ -190,6 +197,31 @@
 
 &ohci0 {
 	status = "okay";
+};
+
+&r_pio {
+	wifi_pwrseq_pin_m200plus: wifi-pwrseq-pins {
+		pins = "PL4", "PL6", "PL7", "PL8", "PL9", "PL10";
+		function = "gpio_in";
+		bias-pull-up;
+	};
+};
+
+&mmc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc1_pg_pins>;
+	vmmc-supply = <&reg_dldo1>;
+	mmc-pwrseq = <&wifi_pwrseq>;
+	bus-width = <4>;
+	non-removable;
+	status = "okay";
+
+	rtl8188eu: wifi@1 {
+		reg = <1>;
+		interrupt-parent = <&r_pio>;
+		interrupts = <0 7 IRQ_TYPE_LEVEL_LOW>; // PL7
+		interrupt-names = "host-wake";
+	};
 };
 
 &mmc2 {
@@ -233,7 +265,6 @@
 };
 
 &reg_aldo1 {
-	regulator-always-on;
 	regulator-min-microvolt = <3000000>;
 	regulator-max-microvolt = <3000000>;
 	regulator-name = "vcc-io";
@@ -261,6 +292,7 @@
 };
 
 &reg_dcdc1 {
+	status = "okay";
 	regulator-always-on;
 	regulator-min-microvolt = <3000000>;
 	regulator-max-microvolt = <3000000>;
@@ -288,12 +320,13 @@
 	regulator-name = "vcc-dram";
 };
 
-// rf section in the fex file
+// Related to dsi power
 &reg_eldo1 {
 	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-dsi";
+	status = "okay";
 };
 
 // Related to lcd and dsi power
@@ -315,7 +348,8 @@
 &reg_dldo1 {
 	regulator-min-microvolt = <3300000>;
 	regulator-max-microvolt = <3300000>;
-	regulator-name = "vcc-3V3-Wifi_unused";
+	regulator-name = "vcc-3V3-Wifi_sdio";
+	status = "okay";
 };
 
 // Wifi chip (not on rev2.&, and you will use a usb wifi dongle instead on rev 1.1)
@@ -493,6 +527,20 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 	status = "okay";
 };
 
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1_pg_pins>, <&uart1_cts_rts_pg_pins>;
+	uart-has-rtscts;
+	status = "okay";
+
+	bluetooth {
+		compatible = "realtek,rtl8188eu-bt";
+		enable-gpios = <&pio 0 8 GPIO_ACTIVE_HIGH>;       // PL08
+		host-wake-gpios = <&pio 0 9 GPIO_ACTIVE_LOW>;     // PL09
+		device-wake-gpios = <&pio 0 10 GPIO_ACTIVE_HIGH>; // PL10
+	};
+};
+
 &pio {
     vcc-pa-supply = <&reg_dcdc1>;
     vcc-pb-supply = <&reg_dcdc1>;
@@ -503,8 +551,6 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
     vcc-pg-supply = <&reg_dcdc1>;
 	vcc-ph-supply = <&reg_dcdc1>;
 	vcc-pl-supply = <&reg_dcdc1>;
-
-    //vcc-pl-supply = <&reg_dldo1>; // Not clear, but reg not found in the kernel start
 
 	uart0_pf_pins: uart0-pf-pins {
 		allwinner,pins = "PF2", "PF4";
@@ -530,38 +576,4 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 		pins = "PE1";
 		function = "csi";
 	};*/
-
-/*
-    /* PB3 "Clear To Send" in conflict with power button led gpio...
-    uart2_cts_rts_pb_pins: uart2-cts-rts-pb-pins {
-        pins = "PB2", "PB3";
-        function = "uart2";
-    };
-    */
-	/*
-    wifi_pwrseq: wifi-pwrseq {
-        compatible = "mmc-pwrseq-simple";
-        reset-gpios = <&pio 11 6 GPIO_ACTIVE_HIGH>; // PL6
-    };
-
-	mmc_pwrseq: mmc-pwrseq {
-		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&pio 2 16 GPIO_ACTIVE_HIGH>; // PC16
-	};
-	*/
-    /*
-	wireless-bluetooth {
-		bt_wake_pin: bt-wake-pin {
-			allwinner,pins = <11 10 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
-		};
-
-		bt_host_wake_pin: bt-host-wake-pin {
-			allwinner,pins = <11 9 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
-		};
-
-		bt_reset_pin: bt-reset-pin {
-			allwinner,pins = <11 8 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
-		};
-	};
-    */
 };
