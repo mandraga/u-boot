@@ -243,10 +243,10 @@
 	pinctrl-0 = <&mmc2_8bit_pins>;
 	vmmc-supply = <&reg_dcdc1>;
 	bus-width = <8>;
+	// 25Mhz and uboot works but not linux
+	// 50Mhz and linux works but not uboot
 	max-frequency = <50000000>;
 	non-removable;
-	//cap-mmc-hw-reset;
-	//cap-mmc-highspeed;
 	//no-1-8-v;
 	status = "okay";
 };
