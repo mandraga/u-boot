@@ -242,9 +242,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc2_8bit_pins>;
 	vmmc-supply = <&reg_dcdc1>;
-	bus-width = <8>;
 	// 25Mhz and uboot works but not linux
+	//bus-width = <4>;
+	//max-frequency = <25000000>;
 	// 50Mhz and linux works but not uboot
+	bus-width = <8>;
 	max-frequency = <50000000>;
 	non-removable;
 	//no-1-8-v;
