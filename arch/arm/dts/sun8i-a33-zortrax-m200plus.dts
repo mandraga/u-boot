@@ -312,7 +312,6 @@
 };
 
 &reg_dcdc1 {
-	status = "okay";
 	regulator-always-on;
 	regulator-min-microvolt = <3000000>;
 	regulator-max-microvolt = <3000000>;
@@ -342,7 +341,7 @@
 
 // Related to dsi power
 &reg_eldo1 {
-	regulator-always-on;
+	regulator-boot-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-dsi";
@@ -350,7 +349,7 @@
 
 // Related to lcd and dsi power
 &reg_eldo2 {
-	regulator-always-on;
+	regulator-boot-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "vcc-dsi-iovcc";
@@ -371,7 +370,7 @@
 	status = "okay";
 };
 
-// Wifi chip (not on rev2.&, and you will use a usb wifi dongle instead on rev 1.1)
+// Wifi chip (not on rev2.1)
 &reg_dldo2 {
 	status = "disabled";
 	regulator-min-microvolt = <1800000>;
