@@ -468,9 +468,6 @@ SW seems unconnected to the SOM, hence the useless switch on the printer, probab
 
 SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 
-        interrupt-parent = <&pio>;
-		interrupts = <1 5 IRQ_TYPE_EDGE_FALLING>; // PB05: port B (1), pin 5
-
 */
 
 &i2c0 {
