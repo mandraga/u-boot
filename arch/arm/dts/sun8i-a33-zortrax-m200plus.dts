@@ -412,16 +412,13 @@
 };
 
 &reg_drivevbus {
+	regulator-always-on;
 	regulator-name = "usb0-vbus";
 	status = "okay";
 };
 
 &reg_rtc_ldo {
 	regulator-name = "vcc-rtc";
-};
-
-&usb_power_supply {
-    status = "okay";
 };
 
 &sound {
@@ -515,11 +512,13 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 };*/
 
 &usb_otg {
-	dr_mode = "otg";
+	dr_mode = "host"; // To get the host under linux
+	//dr_mode = "otg"; // To use Usb Mass Storage to program the EMMC from a Linux computer
 	status = "okay";
 };
 
 &usb_power_supply {
+	regulator-always-on;
 	status = "okay";
 };
 
@@ -531,7 +530,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 	//usb0_vbus_det-gpio = <&axp_gpio 0 GPIO_ACTIVE_HIGH>;
 	// Non sense pin
 	//usb0_vbus_det-gpio = <&pio 1 3 GPIO_ACTIVE_HIGH>; // PB3 does not work neither
-    usb0_vbus-supply = <&reg_dcdc1>;
+    usb0_vbus-supply = <&reg_drivevbus>;
 	//usb1_vbus-supply = <&usb_power_supply>; // USB1 VBUS is always on
     status = "okay";
 };
