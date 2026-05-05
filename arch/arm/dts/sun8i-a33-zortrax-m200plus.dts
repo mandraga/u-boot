@@ -512,8 +512,7 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 };*/
 
 &usb_otg {
-	dr_mode = "host"; // To get the host under linux
-	//dr_mode = "otg"; // To use Usb Mass Storage to program the EMMC from a Linux computer
+	dr_mode = "host";
 	status = "okay";
 };
 
@@ -524,7 +523,6 @@ SOM's USBDRVVBUS goes to a transistor that powers VBUS or not
 
 &usbphy {
 	compatible = "allwinner,sun8i-a23-usb-phy";
-    usb0_id_det-gpios = <&pio 7 8 GPIO_ACTIVE_HIGH>; // PH08: port H (7), pin 8
 	// VBUS detection from AXP221 internally, no AXP223 GPIO is connected to VBUS
 	// does not work usb0_vbus_det-gpio = <&axp_gpio 1 GPIO_ACTIVE_HIGH>; // AXP221 GPIO1 has also the POWER label and toggles at the same time as VBUS on kernel start
 	//usb0_vbus_det-gpio = <&axp_gpio 0 GPIO_ACTIVE_HIGH>;
